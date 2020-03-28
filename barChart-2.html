@@ -1,0 +1,137 @@
+<html>
+  <head>
+    <title>柱形图的坐标轴</title>
+    <script
+      src="https://s2.pstatp.com/cdn/expire-1-M/d3/3.5.16/d3.min.js"
+      charset="utf-8"
+    ></script>
+  </head>
+
+  <style>
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: black;
+      shape-rendering: crispEdges;
+    }
+
+    .axis text {
+      font-family: sans-serif;
+      font-size: 11px;
+    }
+
+    .myRect {
+      fill: steelblue;
+    }
+
+    .myText {
+      fill: white;
+      text-anchor: middle; /*文字居中*/
+    }
+  </style>
+
+  <body>
+    <script>
+      //画布大小
+      let width = 400;
+      let height = 400;
+
+      //在body里添加一个SVG画布
+      let svg = d3
+        .select("body")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+      //画布周边的空白
+      let padding = { left: 30, right: 30, top: 20, bottom: 20 };
+
+      //定义数据和比例尺,x轴使用序数比例尺，y轴使用线性比例尺
+      const dataset = [10, 20, 30, 40, 33, 24, 12, 5];
+      let xScale = d3.scale
+        .ordinal()
+        .domain(d3.range(dataset.length))
+        .rangeRoundBands([0, width - padding.left - padding.right]);
+      let yScale = d3.scale
+        .linear()
+        .domain([0, d3.max(dataset)])
+        .range([height - padding.top - padding.bottom, 0]); //y轴值域从下到上递增
+
+      //定义坐标轴，x轴刻度方向向下，y轴的向左
+      let xAxis = d3.svg
+        .axis()
+        .scale(xScale)
+        .orient("bottom");
+      let yAxis = d3.svg
+        .axis()
+        .scale(yScale)
+        .orient("left");
+
+      //添加矩形和文字
+      const rectPadding = 4;
+      let rects = svg
+        .selectAll(".myRect")
+        .data(dataset)
+        .enter()
+        .append("rect")
+        .attr("class", "myRect")
+        .attr(
+          "transform",
+          "translate(" + padding.left + "," + padding.top + ")"
+        )
+        .attr("x", function(d, i) {
+          return xScale(i) + rectPadding / 2;
+        })
+        .attr("y", function(d) {
+          return yScale(d);
+        })
+        .attr("width", xScale.rangeBand() - rectPadding)
+        .attr("height", function(d) {
+          return height - padding.top - padding.bottom - yScale(d);
+        });
+      //文字
+      let texts = svg
+        .selectAll(".myText")
+        .data(dataset)
+        .enter()
+        .append("text")
+        .attr("class", "myText")
+        .attr(
+          "transform",
+          "translate(" + padding.left + "," + padding.top + ")"
+        )
+        .attr("x", function(d, i) {
+          return xScale(i) + rectPadding / 2;
+        })
+        .attr("y", function(d) {
+          return yScale(d);
+        })
+        .attr("dx", function() {
+          return (xScale.rangeBand() - rectPadding) / 2;
+        })
+        .attr("dy", function(d) {
+          return 20;
+        })
+        .text(function(d) {
+          return d;
+        });
+
+      //添加坐标轴元素
+      svg
+        .append("g")
+        .attr("class", "axis")
+        .attr(
+          "transform",
+          "translate(" + padding.left + "," + (height - padding.bottom) + ")"
+        )
+        .call(xAxis);
+      svg
+        .append("g")
+        .attr("class", "axis")
+        .attr(
+          "transform",
+          "translate(" + padding.left + "," + padding.top + ")"
+        )
+        .call(yAxis);
+    </script>
+  </body>
+</html>

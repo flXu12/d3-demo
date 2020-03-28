@@ -1,0 +1,63 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>拖拽</title>
+  </head>
+  <style></style>
+  <body>
+    <script
+      src="https://s2.pstatp.com/cdn/expire-1-M/d3/3.5.16/d3.min.js"
+      charset="utf-8"
+    ></script>
+    <script>
+      const height = 400;
+      const width = 400;
+      let svg = d3
+        .select("body")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+      const circles = [
+        { cx: 150, cy: 200, r: 30 },
+        { cx: 250, cy: 200, r: 30 }
+      ];
+
+      let drag = d3.behavior
+        .drag() //创建一个拖拽
+        .origin(function(d, i) {
+          return { x: d.cx, y: d.cy };
+        }) //设置起始坐标
+        .on("dragstart", function(d) {
+          console.log("拖拽开始");
+        })
+        .on("dragend", function(d) {
+          console.log("拖拽结束");
+        })
+        .on("drag", function(d) {
+          console.log(d3.event);
+          d3.select(this) //选择当前被拖拽的元素
+            //将d3.event.x赋值给被绑定的数据，再将cx属性设置为该值
+            .attr("cx", (d.cx = d3.event.x))
+            .attr("cy", (d.cy = d3.event.y));
+        });
+
+      svg
+        .selectAll("circle")
+        .data(circles)
+        .enter()
+        .append("circle")
+        .attr("cx", function(d) {
+          return d.cx;
+        })
+        .attr("cy", function(d) {
+          return d.cy;
+        })
+        .attr("r", function(d) {
+          return d.r;
+        })
+        .attr("fill", "black")
+        .call(drag); //调用drag函数
+    </script>
+  </body>
+</html>

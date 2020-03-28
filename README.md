@@ -1,0 +1,30 @@
+### d3 demo
+
+- area-henerator ---- 区域生成器
+- axis ---- 坐标轴
+- barChart-1 ---- 柱状图
+- barChart-2 ---- 带坐标轴的柱状图
+- bundle-layout ---- 捆图
+- chord-1 ---- 弦图
+- chord-2 ---- 可交互的弦图
+- circle ---- 圆
+- drag ---- 拖拽
+- force-directed-graph-1 ---- 力导向图
+- force-directed-graph-2 ---- 拖拽样式变化的力导向图
+- histogram ---- 直方图
+- keyboard ---- 键盘事件
+- line-chart ---- 折线图
+- mind-mapping ---- 思维导图
+- mouse ---- 鼠标事件
+- ordinalScale ---- 序数比例尺
+- pie-1 ---- 饼图
+- pie-2 ---- 带 label 的饼图
+- quantizeScaleCircles ---- 颜色渐变的圆
+- scatterChart ---- 散点图
+- tooltip ---- 提示框
+- touch ---- 触屏事件
+- transition-1 ---- 长度和文字渐变
+- transition-scatter ---- 散点过渡
+- tree-diagram ---- 树状图
+- zoom ---- 缩放
+- geojson-chinamap ---- 中国地图

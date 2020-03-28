@@ -1,0 +1,196 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>饼状图的提示框</title>
+  </head>
+  <style>
+    .tooltip {
+      font-family: simsun;
+      font-size: 14px;
+      width: 120px;
+      height: auto;
+      position: absolute;
+      text-anchor: center;
+      border-style: solid;
+      border-width: 1px;
+      background-color: white;
+      border-radius: 5px;
+    }
+  </style>
+  <body>
+    <script
+      src="https://s2.pstatp.com/cdn/expire-1-M/d3/3.5.17/d3.min.js"
+      charset="utf-8"
+    ></script>
+    <script>
+      const width = 600;
+      const height = 600;
+      let svg = d3
+        .select("body")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+      //初始数据
+      const dataset = [
+        ["小米", 60.8],
+        ["三星", 58.4],
+        ["联想", 47.3],
+        ["苹果", 46.6],
+        ["华为", 41.3],
+        ["酷派", 40.1],
+        ["其他", 111.5]
+      ];
+      //转换数据
+      let pie = d3.layout.pie().value(function(d) {
+        return d[1];
+      });
+      let pieData = pie(dataset);
+      console.log(pieData);
+
+      const fontsize = 14;
+      const outerRadius = 400 / 3;
+      const innerRadius = 0;
+      let arc = d3.svg
+        .arc()
+        .innerRadius(innerRadius)
+        .outerRadius(outerRadius);
+
+      const color = d3.scale.category20();
+
+      //添加对应数目的弧组
+      let arcs = svg
+        .selectAll("g")
+        .data(pieData)
+        .enter()
+        .append("g")
+        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+      //绘制弧
+      arcs
+        .append("path")
+        .attr("fill", function(d, i) {
+          return color(i);
+        })
+        .attr("d", function(d) {
+          return arc(d);
+        });
+
+      //绘制弧内文字
+      arcs
+        .append("text")
+        .attr("transform", function(d) {
+          //文字的x,y坐标
+          let x = arc.centroid(d)[0] * 1.4;
+          let y = arc.centroid(d)[1] * 1.4;
+          return "translate(" + x + "," + y + ")";
+        })
+        .attr("text-anchor", "middle")
+        .style("font-size", fontsize)
+        .text(function(d) {
+          //计算时长份额
+          let percent =
+            (Number(d.value) /
+              d3.sum(dataset, function(d) {
+                return d[1];
+              })) *
+            100;
+          //保留1位小数
+          return percent.toFixed(1) + "%";
+        });
+
+      //绘制连接弧外文字的直线
+      arcs
+        .append("line")
+        .style("stroke", "black")
+        .attr("x1", function(d) {
+          return arc.centroid(d)[0] * 2;
+        })
+        .attr("y1", function(d) {
+          return arc.centroid(d)[1] * 2;
+        })
+        .attr("x2", function(d) {
+          return arc.centroid(d)[0] * 2.2;
+        })
+        .attr("y2", function(d) {
+          return arc.centroid(d)[1] * 2.2;
+        });
+
+      arcs
+        .append("line")
+        .style("stroke", "black")
+        .each(function(d) {
+          d.textLine = { x1: 0, y1: 0, x2: 0, y2: 0 };
+        })
+        .attr("x1", function(d) {
+          d.textLine.x1 = arc.centroid(d)[0] * 2.2;
+          return d.textLine.x1;
+        })
+        .attr("y1", function(d) {
+          d.textLine.y1 = arc.centroid(d)[1] * 2.2;
+          return d.textLine.y1;
+        })
+        .attr("x2", function(d) {
+          let strLen = getPixelLength(d.data[0], fontsize) * 1.5;
+          let bx = arc.centroid(d)[0] * 2.2;
+          d.textLine.x2 = bx >= 0 ? bx + strLen : bx - strLen;
+          return d.textLine.x2;
+        })
+        .attr("y2", function(d) {
+          d.textLine.y2 = arc.centroid(d)[1] * 2.2;
+          return d.textLine.y2;
+        });
+
+      //绘制弧外文字
+      arcs
+        .append("text")
+        .attr("transform", function(d) {
+          let x = 0;
+          let y = 0;
+          x = (d.textLine.x1 + d.textLine.x2) / 2;
+          y = d.textLine.y1;
+          y = y > 0 ? y + fontsize * 1.1 : y - fontsize * 0.4;
+          return "translate(" + x + "," + y + ")";
+        })
+        .style("text-anchor", "middle")
+        .style("font-size", fontsize)
+        .text(function(d) {
+          return d.data[0];
+        });
+
+      //添加一个提示框
+      let tooltip = d3
+        .select("body")
+        .append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0.0);
+
+      arcs
+        .on("mouseover", function(d) {
+          tooltip
+            .html(d.data[0] + "的出货量为<br />" + d.data[1] + "百万台")
+            .style("left", d3.event.pageX + "px")
+            .style("top", d3.event.pageY + 20 + "px")
+            .style("opacity", 1.0);
+        })
+        .on("mousemove", function(d) {
+          tooltip
+            .style("left", d3.event.pageX + "px")
+            .style("top", d3.event.pageY + 20 + "px");
+        })
+        .on("mouseout", function(d) {
+          tooltip.style("opacity", 0.0);
+        });
+
+      function getPixelLength(str, fontsize) {
+        let curLen = 0;
+        for (let i = 0; i < str.length; i++) {
+          let code = str.charCodeAt(i);
+          let pixelLen = code > 255 ? fontsize : fontsize / 2;
+          curLen += pixelLen;
+        }
+        return curLen;
+      }
+    </script>
+  </body>
+</html>

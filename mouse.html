@@ -1,0 +1,133 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>鼠标事件</title>
+  </head>
+  <style>
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: black;
+      shape-rendering: crispEdges;
+    }
+
+    .axis text {
+      font-family: sans-serif;
+      font-size: 11px;
+    }
+  </style>
+  <body>
+    <script
+      src="https://s2.pstatp.com/cdn/expire-1-M/d3/3.5.16/d3.min.js"
+      charset="utf-8"
+    ></script>
+    <script>
+      const dataset = [50, 43, 120, 87, 99, 167, 142];
+      //svg绘制区域的宽高
+      const width = 400;
+      const height = 400;
+
+      let svg = d3
+        .select("body")
+        .append("svg")
+        .attr("height", height)
+        .attr("width", width);
+
+      //x,y轴宽度
+      const xAxisWidth = 300;
+      const yAxisWidth = 300;
+
+      //x,y轴 比例尺
+      let xScale = d3.scale
+        .ordinal()
+        .domain(d3.range(dataset.length))
+        .rangeRoundBands([0, xAxisWidth], 0.2);
+      let yScale = d3.scale
+        .linear()
+        .domain([0, d3.max(dataset)])
+        .range([0, yAxisWidth]);
+
+      const padding = { top: 30, right: 30, bottom: 30, left: 30 };
+
+      let rect = svg
+        .selectAll("rect")
+        .data(dataset)
+        .enter()
+        .append("rect")
+        .attr("fill", "steelblue")
+        .attr("x", function(d, i) {
+          return padding.left + xScale(i);
+        })
+        .attr("y", function(d, i) {
+          return height - padding.bottom - yScale(d);
+        })
+        .attr("width", xScale.rangeBand())
+        .attr("height", function(d) {
+          return yScale(d);
+        })
+        .on("mouseover", function(d, i) {
+          d3.select(this).attr("fill", "yellow");
+        })
+        .on("mouseout", function(d, i) {
+          d3.select(this)
+            .transition()
+            .duration(500)
+            .attr("fill", "steelblue");
+        });
+
+      let text = svg
+        .selectAll("text")
+        .data(dataset)
+        .enter()
+        .append("text")
+        .attr("fill", "white")
+        .attr("font-size", "14px")
+        .attr("text-anchor", "middle")
+        .attr("x", function(d, i) {
+          return padding.left + xScale(i);
+        })
+        .attr("y", function(d) {
+          return height - padding.bottom - yScale(d);
+        })
+        .attr("dx", xScale.rangeBand() / 2)
+        .attr("dy", "1em")
+        .text(function(d) {
+          return d;
+        });
+
+      let xAxis = d3.svg
+        .axis()
+        .scale(xScale)
+        .orient("bottom");
+
+      yScale.range([yAxisWidth, 0]);
+
+      let yAxis = d3.svg
+        .axis()
+        .scale(yScale)
+        .orient("left");
+
+      svg
+        .append("g")
+        .attr("class", "axis")
+        .attr(
+          "transform",
+          "translate(" + padding.left + "," + (height - padding.bottom) + ")"
+        )
+        .call(xAxis);
+
+      svg
+        .append("g")
+        .attr("class", "axis")
+        .attr(
+          "transform",
+          "translate(" +
+            padding.left +
+            "," +
+            (height - padding.bottom - yAxisWidth) +
+            ")"
+        )
+        .call(yAxis);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,101 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>树状图</title>
+  </head>
+  <style>
+    .node circle {
+      fill: #fff;
+      stroke: steelblue;
+      stroke-width: 1.5px;
+    }
+
+    .node {
+      font: 12px sans-serif;
+    }
+
+    .link {
+      fill: none;
+      stroke: #ccc;
+      stroke-width: 1.5px;
+    }
+  </style>
+  <body>
+    <script
+      src="https://s2.pstatp.com/cdn/expire-1-M/d3/3.5.16/d3.min.js"
+      charset="utf-8"
+    ></script>
+    <script>
+      const width = 500;
+      const height = 500;
+      let svg = d3
+        .select("body")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+      let gTree = svg.append("g").attr("transform", "translate(40, 0)");
+
+      //创建一个树状图布局，并设定布局的尺寸和节点之间的间隔
+      let tree = d3.layout
+        .tree()
+        //设置宽高
+        .size([width, height - 200])
+        //tree.separation()设定或获取相邻节点之间的间隔
+        .separation(function(a, b) {
+          return a.parent == b.parent ? 1 : 2;
+        });
+
+      //创建一个对角线生成器，并设定其投影。
+      //树状图布局默认是将各个节点坐标安排成一棵从上到下逐渐展开的树，弦将其绘制成由左到右的
+      let diagonal = d3.svg.diagonal().projection(function(d) {
+        //projection()作用于每一个节点，将x坐标与y坐标对调，就能绘制成一个横向的树状图
+        return [d.y, d.x];
+      });
+
+      d3.json("city.json", function(error, root) {
+        let nodes = tree.nodes(root);
+        let links = tree.links(nodes);
+        console.log(nodes);
+        console.log(links);
+
+        //添加树状图的连线
+        let link = gTree
+          .selectAll(".link")
+          .data(links)
+          .enter()
+          .append("path")
+          .attr("class", "link")
+          //使用对角线生成器
+          .attr("d", diagonal);
+
+        let node = gTree
+          .selectAll(".node")
+          .data(nodes)
+          .enter()
+          .append("g")
+          .attr("class", "node")
+          //与对角线生成器的投影函数保持一致，d.y作为x方向平移量,d.x作为y方向的平移量
+          .attr("transform", function(d) {
+            return "translate(" + d.y + "," + d.x + ")";
+          });
+
+        node.append("circle").attr("r", 4.5);
+
+        //如果某节点是叶子节点，则节点文字在圆圈的右边，否则在左边
+        node
+          .append("text")
+          .attr("dx", function(d) {
+            return d.children ? -8 : 8;
+          })
+          .attr("dy", 3)
+          .style("text-anchor", function(d) {
+            return d.children ? "end" : "start";
+          })
+          .text(function(d) {
+            return d.name;
+          });
+      });
+    </script>
+  </body>
+</html>

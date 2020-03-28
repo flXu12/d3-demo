@@ -1,0 +1,178 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>直方图</title>
+  </head>
+  <style>
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: black;
+      shape-rendering: crispEdges;
+    }
+
+    .axis text {
+      font-family: sans-serif;
+      font-size: 11px;
+    }
+
+    .rect {
+      fill: steelblue;
+    }
+
+    .linePath {
+      fill: none;
+      stroke: black;
+      stroke-width: 3px;
+    }
+  </style>
+  <body>
+    <script
+      src="https://s2.pstatp.com/cdn/expire-1-M/d3/3.5.16/d3.min.js"
+      charset="utf-8"
+    ></script>
+    <script>
+      const width = 500;
+      const height = 500;
+      let svg = d3
+        .select("body")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+      //初始数据
+      const rand = d3.random.normal(170, 10);
+      let dataset = [];
+      for (let i = 0; i < 100; i++) {
+        dataset.push(rand());
+      }
+      console.log(dataset);
+
+      //转换数据
+      const binNum = 20;
+      const rangeMin = 130;
+      const rangeMax = 210;
+      let histogram = d3.layout
+        .histogram()
+        .range([rangeMin, rangeMax]) //数据分布的范围
+        .bins(binNum) //bins的数量
+        .frequency(true); //按照数量统计的方式
+      let hisData = histogram(dataset);
+      console.log(hisData);
+
+      //定义x,y轴比例尺
+      const xAxisWidth = 450;
+      let xTicks = hisData.map(function(d) {
+        return d.x;
+      });
+      let xScale = d3.scale
+        .ordinal()
+        .domain(xTicks)
+        .rangeRoundBands([0, xAxisWidth], 0.1);
+
+      const yAxisWidth = 450;
+      let yScale = d3.scale
+        .linear()
+        .domain([
+          d3.min(hisData, function(d) {
+            return d.y;
+          }),
+          d3.max(hisData, function(d) {
+            return d.y;
+          })
+        ])
+        .range([5, yAxisWidth]);
+
+      const padding = {
+        top: 30,
+        right: 30,
+        bottom: 30,
+        left: 30
+      };
+
+      //绘制x轴
+      let xAxis = d3.svg
+        .axis()
+        .scale(xScale)
+        .orient("bottom")
+        .tickFormat(d3.format(".0f"));
+
+      svg
+        .append("g")
+        .attr("class", "axis")
+        .attr(
+          "transform",
+          "translate(" + padding.left + "," + (height - padding.bottom) + ")"
+        )
+        .call(xAxis);
+
+      //绘制矩形
+      let gRect = svg
+        .append("g")
+        .attr(
+          "transform",
+          "translate(" + padding.left + "," + -padding.bottom + ")"
+        )
+        .style("opacity", 1.0);
+
+      gRect
+        .selectAll("rect")
+        .data(hisData)
+        .enter()
+        .append("rect")
+        .attr("class", "rect")
+        .attr("x", function(d, i) {
+          return xScale(d.x);
+        })
+        .attr("y", function(d, i) {
+          return height - yScale(d.y);
+        })
+        .attr("width", function(d, i) {
+          return xScale.rangeBand();
+        })
+        .attr("height", function(d) {
+          return yScale(d.y);
+        });
+
+      //绘制曲线
+      let lineGenerator = d3.svg
+        .line()
+        .x(function(d) {
+          return xScale(d.x);
+        })
+        .y(function(d) {
+          return height - yScale(d.y);
+        })
+        .interpolate("basis");
+
+      let gLine = svg
+        .append("g")
+        .attr(
+          "transform",
+          "translate(" + padding.left + "," + -padding.bottom + ")"
+        )
+        .style("opacity", 0.0);
+
+      gLine
+        .append("path")
+        .attr("class", "linePath")
+        .attr("d", lineGenerator(hisData));
+
+      function showRect() {
+        //显示矩形，不显示曲线
+        gRect.style("opacity", 1.0);
+        gLine.style("opacity", 0.0);
+      }
+
+      function showLine() {
+        //显示曲线，不显示矩形
+        gRect.style("opacity", 0.0);
+        gLine.style("opacity", 1.0);
+      }
+    </script>
+    <!-- 全角空格&emsp; -->
+    <br />&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+    <button onclick="showRect()">显示矩形</button>
+    <button onclick="showLine()">显示曲线</button>
+  </body>
+</html>

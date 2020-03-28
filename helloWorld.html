@@ -1,0 +1,30 @@
+<html>
+  <head>
+    <title>hello world</title>
+    <script
+      src="https://s2.pstatp.com/cdn/expire-1-M/d3/5.9.2/d3.min.js"
+      charset="utf-8"
+    ></script>
+  </head>
+
+  <body>
+    <p>Cat</p>
+    <p>Dog</p>
+    <script>
+      //修改dom内容
+      let paragraphs = document.getElementsByTagName("p");
+      for (let i = 0; i < paragraphs.length; i++) {
+        let item = paragraphs.item(i);
+        item.innerHTML = "Hello world";
+      }
+
+      //修改文字颜色和大小
+      let p = d3
+        .select("body")
+        .selectAll("p")
+        .text("Hello world");
+      p.style("color", "red");
+      p.style("font-size", "72px");
+    </script>
+  </body>
+</html>

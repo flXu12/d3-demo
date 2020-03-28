@@ -1,0 +1,41 @@
+<html>
+  <head>
+    <title>区域生成器</title>
+  </head>
+  <body>
+    <script
+      src="https://s2.pstatp.com/cdn/expire-1-M/d3/3.5.16/d3.min.js"
+      charset="utf-8"
+    ></script>
+    <script>
+      const width = 500;
+      const height = 500;
+      let svg = d3
+        .select("body")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+      const dataset = [80, 120, 130, 70, 60, 90];
+      let areaPath = d3.svg
+        .area()
+        .x(function(d, i) {
+          return 50 + i * 80;
+        })
+        .y0(function(d, i) {
+          return height / 2;
+        })
+        .y1(function(d, i) {
+          return height / 2 - d;
+        })
+        .interpolate("step");
+
+      svg
+        .append("path")
+        .attr("d", areaPath(dataset))
+        .attr("stroke", "black")
+        .attr("stroke-width", "3px")
+        .attr("fill", "yellow");
+    </script>
+  </body>
+</html>

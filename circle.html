@@ -1,0 +1,28 @@
+<html>
+  <head>
+    <title>circle</title>
+    <script
+      src="https://s2.pstatp.com/cdn/expire-1-M/d3/5.9.2/d3.min.js"
+      charset="utf-8"
+    ></script>
+  </head>
+  <body>
+    <script>
+      const width = 400;
+      const height = 400;
+      //在body中添加<svg>标签
+      let svg = d3
+        .select("body")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+      //在svg中，以坐标（50，50）为圆心，以50为半径绘制一个圆形<circle>，填充红色
+      svg
+        .append("circle")
+        .attr("cx", "50px")
+        .attr("cy", "50px")
+        .attr("r", "50px")
+        .attr("fill", "red");
+    </script>
+  </body>
+</html>

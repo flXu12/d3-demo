@@ -1,0 +1,43 @@
+<html>
+  <head>
+    <title>颜色渐变的圆们</title>
+    <script
+      src="https://s2.pstatp.com/cdn/expire-1-M/d3/5.9.2/d3.min.js"
+      charset="utf-8"
+    ></script>
+  </head>
+  <body>
+    <script>
+      const colors = ["#888", "#666", "#444", "#222", "#000"];
+      const r = [45, 35, 25, 15, 5];
+      //定义量子化比例尺
+      let quantize = d3
+        .scaleQuantize()
+        .domain([50, 0])
+        .range(colors);
+      //给body添加一个svg元素
+      let svg = d3
+        .select("body")
+        .append("svg")
+        .attr("width", 400)
+        .attr("height", 400);
+      //给svg里添加圆
+      svg
+        .selectAll("circle")
+        .data(r)
+        .enter()
+        .append("circle")
+        .attr("cx", function(d, i) {
+          return 50 + i * 30;
+        })
+        .attr("cy", 50)
+        .attr("r", function(d) {
+          return d;
+        })
+        .attr("fill", function(d) {
+          console.log(d, quantize(d));
+          return quantize(d);
+        });
+    </script>
+  </body>
+</html>

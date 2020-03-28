@@ -1,0 +1,171 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>捆图</title>
+  </head>
+  <style>
+    .node circle {
+      fill: #fff;
+      stroke: steelblue;
+      stroke-width: 1.5px;
+    }
+
+    .node {
+      font: 12px sans-serif;
+    }
+
+    .link {
+      fill: none;
+      stroke: #ccc;
+      stroke-width: 1.5px;
+    }
+  </style>
+  <body>
+    <script
+      src="https://s2.pstatp.com/cdn/expire-1-M/d3/3.5.16/d3.min.js"
+      charset="utf-8"
+    ></script>
+    <script>
+      const width = 500;
+      const height = 500;
+      let svg = d3
+        .select("body")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+      //初始数据
+      const cities = {
+        name: "",
+        children: [
+          { name: "北京" },
+          { name: "上海" },
+          { name: "杭州" },
+          { name: "广州" },
+          { name: "桂林" },
+          { name: "昆明" },
+          { name: "成都" },
+          { name: "西安" },
+          { name: "太原" }
+        ]
+      };
+
+      const railway = [
+        { source: "北京", target: "上海" },
+        { source: "北京", target: "广州" },
+        { source: "北京", target: "杭州" },
+        { source: "北京", target: "西安" },
+        { source: "北京", target: "成都" },
+        { source: "北京", target: "太原" },
+        { source: "北京", target: "桂林" },
+        { source: "北京", target: "昆明" },
+        { source: "北京", target: "成都" },
+        { source: "上海", target: "杭州" },
+        { source: "昆明", target: "成都" },
+        { source: "西安", target: "太原" }
+      ];
+
+      //转换数据
+      let cluster = d3.layout
+        .cluster() //集群图布局
+        .size([360, width / 2 - 50])
+        .separation(function(a, b) {
+          return (a.parent == b.parent ? 1 : 2) / a.depth;
+        });
+
+      let bundle = d3.layout.bundle(); //捆图布局
+
+      let nodes = cluster.nodes(cities);
+      console.log(nodes);
+
+      //将连线两端换成节点对象
+      let oLinks = map(nodes, railway);
+      console.log(oLinks);
+
+      //调用捆图布局，转换数据
+      let links = bundle(oLinks);
+      console.log(links);
+
+      //将links中的source和target由名称替换成节点
+      function map(nodes, links) {
+        let hash = [];
+        nodes.forEach(item => {
+          hash[item.name] = item;
+        });
+        let resultLinks = [];
+        links.forEach(item => {
+          resultLinks.push({
+            source: hash[item.source],
+            target: hash[item.target]
+          });
+        });
+        return resultLinks;
+      }
+
+      //绘图
+      //创建一个放射式线段生成器
+      let line = d3.svg.line
+        .radial()
+        .interpolate("bundle")
+        .tension(0.85)
+        .radius(function(d) {
+          return d.y;
+        })
+        .angle(function(d) {
+          return (d.x / 180) * Math.PI;
+        });
+
+      gBundle = svg
+        .append("g")
+        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+      let color = d3.scale.category20();
+
+      let link = gBundle
+        .selectAll(".link")
+        .data(links)
+        .enter()
+        .append("path")
+        .attr("class", "link")
+        .attr("d", line); //使用线段生成器
+
+      let node = gBundle
+        .selectAll(".node")
+        .data(
+          //只绑定没有子节点的节点，即公共父节点不会绘制
+          nodes.filter(function(d) {
+            return !d.children;
+          })
+        )
+        .enter()
+        .append("g")
+        .attr("class", "node")
+        .attr("transform", function(d) {
+          return (
+            "rotate(" +
+            (d.x - 90) +
+            ")translate(" +
+            d.y +
+            ")rotate(" +
+            (90 - d.x) +
+            ")"
+          );
+        });
+
+      node
+        .append("circle")
+        .attr("r", 20)
+        .style("fill", function(d, i) {
+          return color(i);
+        });
+
+      node
+        .append("text")
+        .attr("dy", ".2em")
+        .style("text-anchor", "middle")
+        .text(function(d) {
+          return d.name;
+        });
+    </script>
+  </body>
+</html>
